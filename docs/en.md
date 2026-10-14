@@ -115,6 +115,8 @@ use the same envelope.
 | POST | `/workspaces/{workspaceId}/authorizations` | yes | creates an authorization |
 | GET | `/workspaces/{workspaceId}/groups` | yes | lists client groups |
 | POST | `/workspaces/{workspaceId}/groups` | yes | creates a client group |
+| GET | `/workspaces/{workspaceId}/accesses` | yes | lists the user's active accesses at the store |
+| POST | `/workspaces/{workspaceId}/accesses/open` | yes | opens a BLE door (returns the hash) or remote (returns the status) |
 
 Request body examples:
 
@@ -158,6 +160,55 @@ Notes:
 - Contracts require a client with a linked workspace (accepted primary link); otherwise the
   response is `VALIDATION`.
 - Authorizations return the list of created links (one per client/store combination).
+
+### Accesses and door opening (BLE and remote)
+
+`GET /workspaces/{workspaceId}/accesses` returns the token user's active accesses at that store
+(same payload as the Haila app `getdashboardaccesses`): each access carries `linkId`, `passages`
+with `devices`, `keys` and `area`, plus the area `devices`.
+
+`POST /workspaces/{workspaceId}/accesses/open` opens a door. Send `passageId` or `deviceId` and,
+optionally, `mode` (`"BLE"` or `"REMOTE"`; when omitted the API prefers remote and falls back to
+BLE):
+
+```json
+{ "passageId": "passage-uuid", "mode": "BLE" }
+```
+
+**REMOTE** device — the API executes the remote opening and returns the status:
+
+```json
+{
+  "mode": "REMOTE",
+  "passageId": "uuid", "passageName": "Gate",
+  "deviceId": "uuid", "deviceName": "Gate", "externalApiKey": "KEY",
+  "opened": true,
+  "status": "OPENED"
+}
+```
+
+**BLE** device — the API returns the temporary hash for the client to write over Bluetooth:
+
+```json
+{
+  "mode": "BLE",
+  "passageId": "uuid", "passageName": "Door 1",
+  "deviceId": "uuid", "deviceName": "Nano", "externalApiKey": "KEY",
+  "bleTouch": false,
+  "connection": {
+    "format": "nano",
+    "hash": "42c24c02cfc9d5ee934e0b7a8c676bc9",
+    "date": "2026-01-05-10-05",
+    "payload": "{\"hash\":\"42c24c02cfc9d5ee934e0b7a8c676bc9\",\"date\":\"2026-01-05-10-05\"}"
+  }
+}
+```
+
+Hash recipe: `md5("yyyy-MM-dd-HH-mm" + externalApiKey + deviceWorkspaceId)` in the
+`America/Sao_Paulo` timezone. `format` is `nano` (payload `{"hash","date"}`) or `atmega`
+(payload `{"h","d"}` with the date without dashes). The `payload` field is already the exact
+string to send to the device BLE service/characteristic; `bleTouch` marks the lock that
+requires a touch before BLE.
 
 ## 6. Response format
 
@@ -383,6 +434,8 @@ const reservations = await partnerApi.listReservations()
 | `invalid token` | Token expired (7 days) or issued with another partner's key. Log in again. |
 | `workspace not found` / `area not found` | Store/area outside the key's linked stores, or wrong id. |
 | `specificDurationId is required when areaId is set` | Provide `specificDurationId` when querying time slots for an area. |
+| `passageId or deviceId is required` | On opening, provide the passage or the device. |
+| `device does not support remote opening` / `... ble opening` | The requested `mode` does not exist on that device; omit `mode` or use the correct one. |
 | `user has no primary workspace` | The user account has no primary workspace; contact Haila. |
 | `endpoint not found` | Engine URL with a duplicated `/api/partner/v1`; the client normalizes it, but check the URL. |
 | Network / CORS error | Engine down or wrong URL. The engine allows CORS for `GET`, `POST` and `PATCH`. |

@@ -367,6 +367,82 @@ export interface CreateClientGroupInput {
   members?: string[]
 }
 
+export interface AccessDeviceFeature {
+  id: string | null
+  name: string | null
+  deviceConnection: string | null
+}
+
+export interface AccessDevice {
+  id: string
+  name: string | null
+  externalApiKey: string | null
+  workspaceId: string | null
+  passageType?: string | null
+  deviceFeatures: AccessDeviceFeature[]
+}
+
+export interface AccessKey {
+  id: string
+  startDate: string | null
+  endDate: string | null
+  lastDirection: string | null
+}
+
+export interface AccessPassage {
+  id: string
+  name: string | null
+  devices: AccessDevice[]
+  keys: AccessKey[]
+  area: { id: string; name: string | null } | null
+}
+
+export interface ActiveAccess {
+  name: string | null
+  linkId: string
+  arrivalStatusId: string | null
+  devices: AccessDevice[]
+  passages: AccessPassage[]
+  createdAt: string | null
+  mainPhotoPath: string | null
+  recipient: string | null
+  senderWorkspaceId: string | null
+}
+
+export interface DashboardAccesses {
+  active: ActiveAccess[]
+}
+
+export interface OpenAccessInput {
+  passageId?: string | null
+  deviceId?: string | null
+  mode?: 'BLE' | 'REMOTE' | null
+}
+
+export interface OpenAccessBleConnection {
+  format: 'nano' | 'atmega'
+  hash: string
+  date: string
+  payload: string
+}
+
+export interface OpenAccessResult {
+  mode: 'BLE' | 'REMOTE'
+  linkId: string | null
+  passageId: string | null
+  passageName: string | null
+  areaId: string | null
+  areaName: string | null
+  deviceId: string
+  deviceName: string | null
+  externalApiKey: string | null
+  deviceWorkspaceId: string | null
+  bleTouch?: boolean
+  connection?: OpenAccessBleConnection
+  opened?: boolean
+  status?: string
+}
+
 export class PartnerApiError extends Error {
   readonly status: number
   readonly code: string
@@ -673,6 +749,23 @@ export const partnerApi = {
   createGroup(workspaceId: string, input: CreateClientGroupInput) {
     return send<ClientGroup>(
       `${apiBase()}/workspaces/${encodeURIComponent(workspaceId)}/groups`,
+      'POST',
+      { ...partnerHeaders(true), ...jsonHeaders() },
+      input,
+    )
+  },
+
+  listAccesses(workspaceId: string) {
+    return send<DashboardAccesses>(
+      `${apiBase()}/workspaces/${encodeURIComponent(workspaceId)}/accesses`,
+      'GET',
+      partnerHeaders(true),
+    )
+  },
+
+  openAccess(workspaceId: string, input: OpenAccessInput) {
+    return send<OpenAccessResult>(
+      `${apiBase()}/workspaces/${encodeURIComponent(workspaceId)}/accesses/open`,
       'POST',
       { ...partnerHeaders(true), ...jsonHeaders() },
       input,
