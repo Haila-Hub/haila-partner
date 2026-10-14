@@ -116,6 +116,7 @@ usam o mesmo envelope.
 | POST | `/workspaces/{workspaceId}/groups` | sim | cria grupo de clientes |
 | GET | `/workspaces/{workspaceId}/accesses` | sim | lista os acessos ativos do usuário na loja |
 | POST | `/workspaces/{workspaceId}/accesses/open` | sim | abre porta BLE (devolve hash) ou remota (devolve status) |
+| GET | `/usage` | não | limites e uso da sua chave de api |
 
 Exemplos de corpo:
 
@@ -208,6 +209,26 @@ Receita do hash: `md5("yyyy-MM-dd-HH-mm" + externalApiKey + deviceWorkspaceId)` 
 `{"h","d"}` com a data sem hífens). O campo `payload` já é a string exata para enviar ao
 serviço/característica BLE do dispositivo; `bleTouch` indica a fechadura que exige toque
 antes do BLE.
+
+### Uso e limites da chave
+
+`GET /usage` (apenas `X-Api-Key`) devolve nome, lojas, limites e o uso do dia/mês da sua
+chave. Toda resposta traz os headers `X-Partner-Quota-*` (limites e uso do dia/mês, overage
+e `hardLimit`). Limite `null` = ilimitado; `hardLimit: false` apenas sinaliza o estouro;
+com `hardLimit: true` a API responde `429` `QUOTA_EXCEEDED` ao passar do limite.
+
+```json
+{
+  "client": { "id": "uuid", "name": "Minha Loja", "active": true, "workspaceIds": ["uuid"] },
+  "usage": {
+    "day": "2026-10-14", "month": "2026-10", "resetAt": "2026-11-01",
+    "dailyLimit": 8000, "dailyUsed": 120,
+    "monthlyLimit": 150000, "monthlyUsed": 5400,
+    "overageLimit": 30000, "overageUsed": 0,
+    "hardLimit": false, "exceeded": false
+  }
+}
+```
 
 ## 6. Formato das respostas
 
