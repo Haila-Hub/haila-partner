@@ -18,6 +18,7 @@ import AreasPanel from './components/AreasPanel.vue'
 import AuthorizationsPanel from './components/AuthorizationsPanel.vue'
 import GroupsPanel from './components/GroupsPanel.vue'
 import AccessesPanel from './components/AccessesPanel.vue'
+import UsagePanel from './components/UsagePanel.vue'
 import { session, tokenIsActive } from './stores/session'
 
 const activeTab = ref('connection')
@@ -62,6 +63,7 @@ const tokenActive = computed(() => tokenIsActive())
         <Tab value="authorizations">Autorizações</Tab>
         <Tab value="groups">Grupos</Tab>
         <Tab value="accesses">Acessos</Tab>
+        <Tab value="usage">Uso</Tab>
       </TabList>
       <TabPanels>
         <TabPanel value="connection"><ConnectionPanel /></TabPanel>
@@ -75,6 +77,7 @@ const tokenActive = computed(() => tokenIsActive())
         <TabPanel value="authorizations"><AuthorizationsPanel /></TabPanel>
         <TabPanel value="groups"><GroupsPanel /></TabPanel>
         <TabPanel value="accesses"><AccessesPanel /></TabPanel>
+        <TabPanel value="usage"><UsagePanel /></TabPanel>
       </TabPanels>
     </Tabs>
   </div>

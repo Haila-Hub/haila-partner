@@ -181,6 +181,19 @@ body {
   background: var(--p-content-background, #282a36);
 }
 
+.usage-head {
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+  align-items: center;
+}
+
+.usage-line {
+  margin: 0;
+  font-size: 0.875rem;
+  color: var(--p-text-muted-color, #8b8fa8);
+}
+
 @media (max-width: 640px) {
   .field-grid {
     grid-template-columns: 1fr;

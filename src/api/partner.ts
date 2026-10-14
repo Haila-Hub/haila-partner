@@ -12,6 +12,37 @@ export interface PartnerToken {
   expiresIn: number
 }
 
+export interface PartnerUsageClient {
+  id: string
+  name: string
+  active: boolean
+  createdAt: string | null
+  workspaceIds: string[]
+}
+
+export interface PartnerUsageCounters {
+  day: string
+  month: string
+  resetAt: string
+  dailyLimit: number | null
+  dailyUsed: number
+  dailyRemaining: number | null
+  monthlyLimit: number | null
+  monthlyUsed: number
+  monthlyRemaining: number | null
+  overageLimit: number
+  overageUsed: number
+  hardLimit: boolean
+  exceeded: boolean
+  allowed: boolean
+  reason: string | null
+}
+
+export interface PartnerUsage {
+  client: PartnerUsageClient
+  usage: PartnerUsageCounters
+}
+
 export interface ReservationCharge {
   id: string
   type: string | null
@@ -553,6 +584,10 @@ export const partnerApi = {
       { ...partnerHeaders(false), ...jsonHeaders() },
       { email, password },
     )
+  },
+
+  usage() {
+    return send<PartnerUsage>(`${apiBase()}/usage`, 'GET', partnerHeaders(false))
   },
 
   listReservations() {
