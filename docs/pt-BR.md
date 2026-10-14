@@ -90,6 +90,74 @@ As rotas marcadas com **Bearer** também exigem `Authorization: Bearer <token>`.
 | POST | `/availability` | sim | consulta disponibilidade |
 | POST | `/pricing` | sim | calcula preço |
 
+### Fluxos por loja (clientes, contratos, áreas, autorizações e grupos)
+
+Rotas escopadas em uma loja da chave: `/workspaces/{workspaceId}/...`. Todas exigem Bearer e
+usam o mesmo envelope.
+
+| Método | Caminho | Bearer | Descrição |
+|---|---|---|---|
+| GET | `/workspaces/{workspaceId}/clients` | sim | lista clientes da loja |
+| POST | `/workspaces/{workspaceId}/clients` | sim | cria cliente |
+| GET | `/workspaces/{workspaceId}/contract-templates` | sim | lista modelos de contrato |
+| GET | `/workspaces/{workspaceId}/contract-options` | sim | ciclos, pagamentos e moedas disponíveis |
+| POST | `/workspaces/{workspaceId}/contract-templates` | sim | cria modelo de contrato |
+| GET | `/workspaces/{workspaceId}/contracts` | sim | lista contratos de clientes |
+| POST | `/workspaces/{workspaceId}/contracts` | sim | cria contrato a partir de um modelo |
+| GET | `/workspaces/{workspaceId}/areas` | sim | lista áreas |
+| POST | `/workspaces/{workspaceId}/areas` | sim | cria área |
+| GET | `/workspaces/{workspaceId}/areas/{areaId}/availability` | sim | horários da área |
+| POST | `/workspaces/{workspaceId}/areas/{areaId}/availability` | sim | substitui os horários da área |
+| GET | `/workspaces/{workspaceId}/area-pricing` | sim | lista preços de área |
+| POST | `/workspaces/{workspaceId}/area-pricing` | sim | cria preço de área |
+| GET | `/workspaces/{workspaceId}/authorizations` | sim | lista autorizações |
+| POST | `/workspaces/{workspaceId}/authorizations` | sim | cria autorização |
+| GET | `/workspaces/{workspaceId}/groups` | sim | lista grupos de clientes |
+| POST | `/workspaces/{workspaceId}/groups` | sim | cria grupo de clientes |
+
+Exemplos de corpo:
+
+```json
+POST /workspaces/{workspaceId}/clients
+{ "type": "PERSON", "email": "cliente@exemplo.com", "firstName": "Ana", "lastName": "Souza", "phoneNumber": "+55 51 99999-0000" }
+
+POST /workspaces/{workspaceId}/contract-templates
+{
+  "name": "Plano mensal", "value": 100, "payDay": 5, "mode": "member",
+  "cycleTypeId": "uuid", "paymentTypeId": "uuid", "autoRenew": true, "autoRenewPeriod": "P1M",
+  "credits": [ { "value": 10, "priority": 1, "currencyUnit": { "id": "uuid" } } ]
+}
+
+POST /workspaces/{workspaceId}/contracts
+{ "templateId": "uuid", "clientId": "workspace-client-uuid", "startDate": "2026-11-01T00:00:00Z", "endDate": "2027-11-01T00:00:00Z" }
+
+POST /workspaces/{workspaceId}/areas
+{ "name": "Sala 03", "areaCategoryName": "Salas", "capacity": 10, "quantity": 1 }
+
+POST /workspaces/{workspaceId}/areas/{areaId}/availability
+{ "days": [ { "dayWeek": "1", "startHour": "08:00", "endHour": "18:00" } ] }
+
+POST /workspaces/{workspaceId}/area-pricing
+{ "name": "Hora avulsa", "basePrice": 60, "baseInterval": "hour", "areaIds": ["uuid"] }
+
+POST /workspaces/{workspaceId}/authorizations
+{ "clients": ["workspace-client-uuid"], "areas": ["uuid"], "startDate": "2026-11-01T00:00:00", "endDate": "2026-11-30T23:59:59", "uses": -1 }
+
+POST /workspaces/{workspaceId}/groups
+{ "name": "Turma A", "members": ["workspace-client-uuid"] }
+```
+
+Observações:
+
+- `dayWeek` vai de `"1"` (segunda) a `"7"` (domingo); sem `weekDays` a área nasce aberta
+  todos os dias (`00:00`–`23:59`).
+- Em `area-pricing`, informe `basePrice` + `baseInterval` (`minute`, `hour`, `day`, `week`,
+  `month` ou `year`) **ou** os seis campos `priceMinute`…`priceYear`. Com `areaIds`, o preço
+  é vinculado às áreas via `area_booking_preferences`.
+- Contratos exigem um cliente com workspace vinculado (vínculo primário aceito); caso
+  contrário a resposta é `VALIDATION`.
+- Autorizações retornam a lista de vínculos criados (uma por combinação cliente/loja).
+
 ## 6. Formato das respostas
 
 Sucesso e erro usam o mesmo envelope:
@@ -316,3 +384,4 @@ const reservas = await partnerApi.listReservations()
 | `endpoint not found` | URL do engine com `/api/partner/v1` duplicado; o cliente normaliza, mas verifique a URL. |
 | Erro de rede / CORS | Engine fora do ar ou URL errada. O engine libera CORS para `GET`, `POST` e `PATCH`. |
 | Cobrança vazia na tela | Reserva sem lançamentos (`financial_entry`) ou engine sem a versão mais recente do script `partner_api.sql`. |
+| `endpoint not found` em `/workspaces/...` | Plugin antigo no engine: entregue o JAR atualizado em `/app/extensions` e rode `POST /api/schema/reload`. |

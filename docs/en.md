@@ -91,6 +91,74 @@ Routes marked **Bearer** also require `Authorization: Bearer <token>`.
 | POST | `/availability` | yes | availability lookup |
 | POST | `/pricing` | yes | price calculation |
 
+### Store-scoped flows (clients, contracts, areas, authorizations and groups)
+
+Routes scoped to one store of the key: `/workspaces/{workspaceId}/...`. All require Bearer and
+use the same envelope.
+
+| Method | Path | Bearer | Description |
+|---|---|---|---|
+| GET | `/workspaces/{workspaceId}/clients` | yes | lists the store's clients |
+| POST | `/workspaces/{workspaceId}/clients` | yes | creates a client |
+| GET | `/workspaces/{workspaceId}/contract-templates` | yes | lists contract templates |
+| GET | `/workspaces/{workspaceId}/contract-options` | yes | available cycles, payments and currencies |
+| POST | `/workspaces/{workspaceId}/contract-templates` | yes | creates a contract template |
+| GET | `/workspaces/{workspaceId}/contracts` | yes | lists client contracts |
+| POST | `/workspaces/{workspaceId}/contracts` | yes | creates a contract from a template |
+| GET | `/workspaces/{workspaceId}/areas` | yes | lists areas |
+| POST | `/workspaces/{workspaceId}/areas` | yes | creates an area |
+| GET | `/workspaces/{workspaceId}/areas/{areaId}/availability` | yes | area opening hours |
+| POST | `/workspaces/{workspaceId}/areas/{areaId}/availability` | yes | replaces the area opening hours |
+| GET | `/workspaces/{workspaceId}/area-pricing` | yes | lists area prices |
+| POST | `/workspaces/{workspaceId}/area-pricing` | yes | creates an area price |
+| GET | `/workspaces/{workspaceId}/authorizations` | yes | lists authorizations |
+| POST | `/workspaces/{workspaceId}/authorizations` | yes | creates an authorization |
+| GET | `/workspaces/{workspaceId}/groups` | yes | lists client groups |
+| POST | `/workspaces/{workspaceId}/groups` | yes | creates a client group |
+
+Request body examples:
+
+```json
+POST /workspaces/{workspaceId}/clients
+{ "type": "PERSON", "email": "client@example.com", "firstName": "Ana", "lastName": "Souza", "phoneNumber": "+55 51 99999-0000" }
+
+POST /workspaces/{workspaceId}/contract-templates
+{
+  "name": "Monthly plan", "value": 100, "payDay": 5, "mode": "member",
+  "cycleTypeId": "uuid", "paymentTypeId": "uuid", "autoRenew": true, "autoRenewPeriod": "P1M",
+  "credits": [ { "value": 10, "priority": 1, "currencyUnit": { "id": "uuid" } } ]
+}
+
+POST /workspaces/{workspaceId}/contracts
+{ "templateId": "uuid", "clientId": "workspace-client-uuid", "startDate": "2026-11-01T00:00:00Z", "endDate": "2027-11-01T00:00:00Z" }
+
+POST /workspaces/{workspaceId}/areas
+{ "name": "Room 03", "areaCategoryName": "Rooms", "capacity": 10, "quantity": 1 }
+
+POST /workspaces/{workspaceId}/areas/{areaId}/availability
+{ "days": [ { "dayWeek": "1", "startHour": "08:00", "endHour": "18:00" } ] }
+
+POST /workspaces/{workspaceId}/area-pricing
+{ "name": "Hourly", "basePrice": 60, "baseInterval": "hour", "areaIds": ["uuid"] }
+
+POST /workspaces/{workspaceId}/authorizations
+{ "clients": ["workspace-client-uuid"], "areas": ["uuid"], "startDate": "2026-11-01T00:00:00", "endDate": "2026-11-30T23:59:59", "uses": -1 }
+
+POST /workspaces/{workspaceId}/groups
+{ "name": "Class A", "members": ["workspace-client-uuid"] }
+```
+
+Notes:
+
+- `dayWeek` ranges from `"1"` (Monday) to `"7"` (Sunday); without `weekDays` the area starts
+  open every day (`00:00`–`23:59`).
+- In `area-pricing`, send `basePrice` + `baseInterval` (`minute`, `hour`, `day`, `week`,
+  `month` or `year`) **or** the six fields `priceMinute`…`priceYear`. With `areaIds`, the
+  price is linked to the areas through `area_booking_preferences`.
+- Contracts require a client with a linked workspace (accepted primary link); otherwise the
+  response is `VALIDATION`.
+- Authorizations return the list of created links (one per client/store combination).
+
 ## 6. Response format
 
 Success and error share the same envelope:
@@ -319,3 +387,4 @@ const reservations = await partnerApi.listReservations()
 | `endpoint not found` | Engine URL with a duplicated `/api/partner/v1`; the client normalizes it, but check the URL. |
 | Network / CORS error | Engine down or wrong URL. The engine allows CORS for `GET`, `POST` and `PATCH`. |
 | Empty billing on screen | Reservation without financial entries (`financial_entry`) or engine missing the latest `partner_api.sql` script. |
+| `endpoint not found` on `/workspaces/...` | Old plugin on the engine: deploy the updated JAR to `/app/extensions` and run `POST /api/schema/reload`. |

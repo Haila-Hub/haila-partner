@@ -12,6 +12,11 @@ import AuthPanel from './components/AuthPanel.vue'
 import ReservationsPanel from './components/ReservationsPanel.vue'
 import AvailabilityPanel from './components/AvailabilityPanel.vue'
 import PricingPanel from './components/PricingPanel.vue'
+import ClientsPanel from './components/ClientsPanel.vue'
+import ContractsPanel from './components/ContractsPanel.vue'
+import AreasPanel from './components/AreasPanel.vue'
+import AuthorizationsPanel from './components/AuthorizationsPanel.vue'
+import GroupsPanel from './components/GroupsPanel.vue'
 import { session, tokenIsActive } from './stores/session'
 
 const activeTab = ref('connection')
@@ -50,6 +55,11 @@ const tokenActive = computed(() => tokenIsActive())
         <Tab value="reservations">Reservas</Tab>
         <Tab value="availability">Disponibilidade</Tab>
         <Tab value="pricing">Preço</Tab>
+        <Tab value="clients">Clientes</Tab>
+        <Tab value="contracts">Contratos</Tab>
+        <Tab value="areas">Áreas</Tab>
+        <Tab value="authorizations">Autorizações</Tab>
+        <Tab value="groups">Grupos</Tab>
       </TabList>
       <TabPanels>
         <TabPanel value="connection"><ConnectionPanel /></TabPanel>
@@ -57,6 +67,11 @@ const tokenActive = computed(() => tokenIsActive())
         <TabPanel value="reservations"><ReservationsPanel /></TabPanel>
         <TabPanel value="availability"><AvailabilityPanel /></TabPanel>
         <TabPanel value="pricing"><PricingPanel /></TabPanel>
+        <TabPanel value="clients"><ClientsPanel /></TabPanel>
+        <TabPanel value="contracts"><ContractsPanel /></TabPanel>
+        <TabPanel value="areas"><AreasPanel /></TabPanel>
+        <TabPanel value="authorizations"><AuthorizationsPanel /></TabPanel>
+        <TabPanel value="groups"><GroupsPanel /></TabPanel>
       </TabPanels>
     </Tabs>
   </div>

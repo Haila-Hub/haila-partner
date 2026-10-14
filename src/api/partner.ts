@@ -70,6 +70,303 @@ export interface PricingInput {
   endDate: string
 }
 
+export interface ClientSummary {
+  id: string
+  type: string | null
+  email: string | null
+  phone: string | null
+  firstName: string | null
+  lastName: string | null
+  brandingName: string | null
+  legalName: string | null
+  address: string | null
+  number: string | null
+  city: string | null
+  state: string | null
+  zipCode: string | null
+  complement: string | null
+  neighborhood: string | null
+  country: string | null
+  description: string | null
+  logoPath: string | null
+  createdAt: string | null
+  updatedAt: string | null
+  primaryLinkId: string | null
+  primaryLinkStatus: string | null
+  primaryWorkspaceId: string | null
+}
+
+export interface ClientPage {
+  items: ClientSummary[]
+  limit: number
+  offset: number
+}
+
+export interface CreateClientInput {
+  type: string
+  email?: string
+  phoneNumber?: string
+  firstName?: string
+  lastName?: string
+  legalName?: string
+  brandingName?: string
+  address?: string
+  number?: string
+  city?: string
+  state?: string
+  zipCode?: string
+  complement?: string
+  neighborhood?: string
+  country?: string
+  description?: string
+}
+
+export interface ContractOption {
+  id: string
+  name: string
+}
+
+export interface CurrencyOption extends ContractOption {
+  symbol: string | null
+  type: string | null
+  symbolBeforeValue: boolean | null
+}
+
+export interface ContractOptions {
+  cycleTypes: ContractOption[]
+  paymentTypes: ContractOption[]
+  currencies: CurrencyOption[]
+}
+
+export interface ContractTemplateCredit {
+  id?: string
+  value: number
+  priority?: number
+  overLimitAllowed?: boolean
+  currencyUnit?: { id: string } | null
+  flags?: { id: string; name: string }[]
+}
+
+export interface ContractTemplate {
+  id: string
+  name: string
+  value: number
+  autoRenew: boolean
+  payDay: number
+  cycleType: ContractOption | null
+  paymentType: ContractOption | null
+  workspaceLinkContractTemplateCredits: ContractTemplateCredit[]
+  workspaceLinkContractsAggregate?: { aggregate: { count: number } } | null
+}
+
+export interface CreateContractTemplateInput {
+  name: string
+  value: number
+  payDay: number
+  mode: string
+  autoRenew: boolean
+  autoRenewPeriod: string
+  cycleTypeId: string
+  paymentTypeId: string
+  extendedContractBehaviour?: string
+  dependentsLimit?: number
+  credits: ContractTemplateCredit[]
+}
+
+export interface ContractSummary {
+  id: string
+  status: string | null
+  priority: number | null
+  startDate: string | null
+  endDate: string | null
+  payDay: number | null
+  workspace_client?: {
+    id: string
+    email: string | null
+    type: string | null
+    brandingName: string | null
+    firstName: string | null
+    lastName: string | null
+  } | null
+  workspace_link_contract_template?: { id: string; name: string | null; value: number | null } | null
+}
+
+export interface ContractPage {
+  items: ContractSummary[]
+  limit: number
+  offset: number
+}
+
+export interface CreateContractInput {
+  templateId: string
+  clientId: string
+  startDate: string
+  endDate: string
+  responsibleWorkspaceId?: string | null
+  priority?: number
+}
+
+export interface WeekDay {
+  id?: string | null
+  dayWeek: string
+  startHour: string
+  endHour: string
+}
+
+export interface Area {
+  id: string
+  name: string
+  nameAbbreviation: string | null
+  description: string | null
+  quantity: number | null
+  capacity: number | null
+  address: string | null
+  addressNumber: string | null
+  district: string | null
+  city: string | null
+  state: string | null
+  zipcode: string | null
+  addressComplement: string | null
+  floor: number | null
+  lat: number | null
+  lng: number | null
+  workspaceId: string
+  areaCategoryId: string
+  areaTypeId: string
+  areaParentId: string | null
+  areaCategory?: { id: string; name: string } | null
+  areaType?: { id: string; name: string } | null
+  area_week_days?: WeekDay[]
+  weekDays?: WeekDay[]
+}
+
+export interface CreateAreaInput {
+  name: string
+  areaCategoryId?: string
+  areaCategoryName?: string
+  areaTypeId?: string
+  nameAbbreviation?: string
+  description?: string
+  quantity?: number
+  capacity?: number
+  floor?: number
+  address?: string
+  addressNumber?: string
+  district?: string
+  city?: string
+  state?: string
+  zipcode?: string
+  addressComplement?: string
+  lat?: number | null
+  lng?: number | null
+  areaParentId?: string
+  weekDays?: WeekDay[]
+}
+
+export interface AreaAvailability {
+  areaId: string
+  days: WeekDay[]
+}
+
+export interface AreaPricing {
+  id: string
+  name: string
+  priceMinute: number
+  priceHour: number
+  priceDay: number
+  priceWeek: number
+  priceMonth: number
+  priceYear: number
+  unitId: string | null
+  unitName: string | null
+  unitSymbol: string | null
+  symbolBeforeValue: boolean | null
+  areaIds: string[]
+}
+
+export interface CreateAreaPricingInput {
+  name: string
+  basePrice?: number
+  baseInterval?: string
+  priceMinute?: number
+  priceHour?: number
+  priceDay?: number
+  priceWeek?: number
+  priceMonth?: number
+  priceYear?: number
+  unitId?: string | null
+  areaIds?: string[]
+}
+
+export interface AuthorizationArea {
+  id: string
+  name: string
+}
+
+export interface AuthorizationKey {
+  id: string
+  copies: number | null
+  startDate: string | null
+  endDate: string | null
+  areas: AuthorizationArea[]
+  passages: { id: string; name: string; areaId: string | null }[]
+}
+
+export interface Authorization {
+  id: string
+  status: string | null
+  startDate: string | null
+  endDate: string | null
+  createdAt: string | null
+  senderWorkspace: { id: string; name?: string | null; firstName?: string | null; lastName?: string | null; brandingName?: string | null; legalName?: string | null; email?: string | null } | null
+  recipientWorkspace: { id: string; type?: string | null; firstName?: string | null; lastName?: string | null; brandingName?: string | null; legalName?: string | null; email?: string | null } | null
+  creatorWorkspace: { id: string; firstName?: string | null; lastName?: string | null; brandingName?: string | null; legalName?: string | null; email?: string | null } | null
+  areas: AuthorizationArea[] | null
+  workspace_client_keys: AuthorizationKey[] | null
+}
+
+export interface CreateAuthorizationInput {
+  clients: string[]
+  areas: string[]
+  passages?: string[]
+  startDate: string
+  endDate?: string | null
+  uses?: number
+  permissionRoleId?: string | null
+}
+
+export interface ClientGroupMember {
+  linkId: string
+  workspaceClientId: string
+  clientName: string | null
+  status: string | null
+}
+
+export interface ClientGroup {
+  id: string
+  name: string | null
+  typeId: string | null
+  categoryId: string | null
+  complement: string | null
+  status: string | null
+  createdAt: string | null
+  members: ClientGroupMember[]
+}
+
+export interface ClientGroupPage {
+  items: ClientGroup[]
+  limit: number
+  offset: number
+}
+
+export interface CreateClientGroupInput {
+  name: string
+  typeId?: string | null
+  categoryId?: string | null
+  complement?: string | null
+  members?: string[]
+}
+
 export class PartnerApiError extends Error {
   readonly status: number
   readonly code: string
@@ -232,6 +529,150 @@ export const partnerApi = {
   pricing(input: PricingInput) {
     return send<unknown>(
       `${apiBase()}/pricing`,
+      'POST',
+      { ...partnerHeaders(true), ...jsonHeaders() },
+      input,
+    )
+  },
+
+  listClients(workspaceId: string) {
+    return send<ClientPage>(
+      `${apiBase()}/workspaces/${encodeURIComponent(workspaceId)}/clients`,
+      'GET',
+      partnerHeaders(true),
+    )
+  },
+
+  createClient(workspaceId: string, input: CreateClientInput) {
+    return send<ClientSummary>(
+      `${apiBase()}/workspaces/${encodeURIComponent(workspaceId)}/clients`,
+      'POST',
+      { ...partnerHeaders(true), ...jsonHeaders() },
+      input,
+    )
+  },
+
+  listContractTemplates(workspaceId: string) {
+    return send<ContractTemplate[]>(
+      `${apiBase()}/workspaces/${encodeURIComponent(workspaceId)}/contract-templates`,
+      'GET',
+      partnerHeaders(true),
+    )
+  },
+
+  listContractOptions(workspaceId: string) {
+    return send<ContractOptions>(
+      `${apiBase()}/workspaces/${encodeURIComponent(workspaceId)}/contract-options`,
+      'GET',
+      partnerHeaders(true),
+    )
+  },
+
+  createContractTemplate(workspaceId: string, input: CreateContractTemplateInput) {
+    return send<{ id: string }>(
+      `${apiBase()}/workspaces/${encodeURIComponent(workspaceId)}/contract-templates`,
+      'POST',
+      { ...partnerHeaders(true), ...jsonHeaders() },
+      input,
+    )
+  },
+
+  listContracts(workspaceId: string) {
+    return send<ContractPage>(
+      `${apiBase()}/workspaces/${encodeURIComponent(workspaceId)}/contracts`,
+      'GET',
+      partnerHeaders(true),
+    )
+  },
+
+  createContract(workspaceId: string, input: CreateContractInput) {
+    return send<Record<string, unknown>>(
+      `${apiBase()}/workspaces/${encodeURIComponent(workspaceId)}/contracts`,
+      'POST',
+      { ...partnerHeaders(true), ...jsonHeaders() },
+      input,
+    )
+  },
+
+  listAreas(workspaceId: string) {
+    return send<Area[]>(
+      `${apiBase()}/workspaces/${encodeURIComponent(workspaceId)}/areas`,
+      'GET',
+      partnerHeaders(true),
+    )
+  },
+
+  createArea(workspaceId: string, input: CreateAreaInput) {
+    return send<Area>(
+      `${apiBase()}/workspaces/${encodeURIComponent(workspaceId)}/areas`,
+      'POST',
+      { ...partnerHeaders(true), ...jsonHeaders() },
+      input,
+    )
+  },
+
+  listAreaAvailability(workspaceId: string, areaId: string) {
+    return send<AreaAvailability>(
+      `${apiBase()}/workspaces/${encodeURIComponent(workspaceId)}/areas/${encodeURIComponent(areaId)}/availability`,
+      'GET',
+      partnerHeaders(true),
+    )
+  },
+
+  setAreaAvailability(workspaceId: string, areaId: string, days: WeekDay[]) {
+    return send<AreaAvailability>(
+      `${apiBase()}/workspaces/${encodeURIComponent(workspaceId)}/areas/${encodeURIComponent(areaId)}/availability`,
+      'POST',
+      { ...partnerHeaders(true), ...jsonHeaders() },
+      { days },
+    )
+  },
+
+  listAreaPricing(workspaceId: string) {
+    return send<AreaPricing[]>(
+      `${apiBase()}/workspaces/${encodeURIComponent(workspaceId)}/area-pricing`,
+      'GET',
+      partnerHeaders(true),
+    )
+  },
+
+  createAreaPricing(workspaceId: string, input: CreateAreaPricingInput) {
+    return send<AreaPricing>(
+      `${apiBase()}/workspaces/${encodeURIComponent(workspaceId)}/area-pricing`,
+      'POST',
+      { ...partnerHeaders(true), ...jsonHeaders() },
+      input,
+    )
+  },
+
+  listAuthorizations(workspaceId: string) {
+    return send<Authorization[]>(
+      `${apiBase()}/workspaces/${encodeURIComponent(workspaceId)}/authorizations`,
+      'GET',
+      partnerHeaders(true),
+    )
+  },
+
+  createAuthorization(workspaceId: string, input: CreateAuthorizationInput) {
+    return send<Authorization[]>(
+      `${apiBase()}/workspaces/${encodeURIComponent(workspaceId)}/authorizations`,
+      'POST',
+      { ...partnerHeaders(true), ...jsonHeaders() },
+      input,
+    )
+  },
+
+  listGroups(workspaceId: string) {
+    return send<ClientGroupPage>(
+      `${apiBase()}/workspaces/${encodeURIComponent(workspaceId)}/groups`,
+      'GET',
+      partnerHeaders(true),
+    )
+  },
+
+  createGroup(workspaceId: string, input: CreateClientGroupInput) {
+    return send<ClientGroup>(
+      `${apiBase()}/workspaces/${encodeURIComponent(workspaceId)}/groups`,
       'POST',
       { ...partnerHeaders(true), ...jsonHeaders() },
       input,

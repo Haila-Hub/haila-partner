@@ -8,6 +8,7 @@ export interface PartnerSessionState {
   token: string
   tokenExpiresAt: number
   email: string
+  workspaceId: string
 }
 
 const defaults: PartnerSessionState = {
@@ -16,6 +17,7 @@ const defaults: PartnerSessionState = {
   token: '',
   tokenExpiresAt: 0,
   email: '',
+  workspaceId: '',
 }
 
 function load(): PartnerSessionState {
